@@ -8,7 +8,7 @@
     include_dependencies: "{{ item.include_dependencies|default(omit) }}"
     pre_release:          "{{ item.pre_release|default(omit) }}"
     repository:           "{{ item.repository|default(omit) }}"
-    state:                "{{ item.state|default(omit) }}"
+    state:                "{{ item.state|default('present') }}"
     user_install:         "{{ item.user_install|default(false) }}"
     version:              "{{ item.version|default(omit) }}"
   with_items: elao_gem_packages
