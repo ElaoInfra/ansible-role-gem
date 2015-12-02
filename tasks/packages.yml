@@ -1,14 +1,38 @@
 ---
 
+- name: packages > Check gem packages
+  command: "gem list -i {{ (item) if (item is string) else (item.name) }} {{ (\"--version '%s'\"|format(item.version)) if (item .version is defined) else ('') }}"
+  with_items: elao_gem_packages
+  always_run: yes
+  failed_when: false
+  changed_when: false
+  register: __elao_gem_packages
+
+# Pair packages with their checks
+- name: packages > Pair gem packages
+  set_fact:
+    # Waiting for the ansible 2 "combine" filter...
+    __item: "{% set __item = item.0.update({'__installed': item.1.rc|ternary(false,true)}) %}{{ item.0 }}"
+  with_together:
+    - elao_gem_packages
+    - __elao_gem_packages.results
+  register: __elao_gem_packages
+
+# Flatten results structure to the original variable
+- name: packages > Flatten gem packages
+  set_fact:
+    elao_gem_packages: "{{ __elao_gem_packages.results|map(attribute='ansible_facts.__item')|list }}"
+
 - name: packages > Setup gem packages
   gem:
-    name:                 "{{ item.name }}"
+    name:                 "{{ (item) if (item is string) else (item.name) }}"
     executable:           "{{ item.executable|default(omit) }}"
     gem_source:           "{{ item.gem_source|default(omit) }}"
     include_dependencies: "{{ item.include_dependencies|default(omit) }}"
     pre_release:          "{{ item.pre_release|default(omit) }}"
     repository:           "{{ item.repository|default(omit) }}"
     state:                "{{ item.state|default('present') }}"
-    user_install:         "{{ item.user_install|default(false) }}"
+    user_install:         "{{ item.user_install|default(false)|bool }}"
     version:              "{{ item.version|default(omit) }}"
   with_items: elao_gem_packages
+  when: not item.__installed
