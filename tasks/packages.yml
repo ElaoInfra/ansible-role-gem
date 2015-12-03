@@ -15,13 +15,15 @@
     __item: "{% set __item = item.0.update({'__installed': item.1.rc|ternary(false,true)}) %}{{ item.0 }}"
   with_together:
     - elao_gem_packages
-    - __elao_gem_packages.results
+    - (__elao_gem_packages.results) if (elao_gem_packages) else (elao_gem_packages)
   register: __elao_gem_packages
+  no_log: true
 
 # Flatten results structure to the original variable
 - name: packages > Flatten gem packages
   set_fact:
     elao_gem_packages: "{{ __elao_gem_packages.results|map(attribute='ansible_facts.__item')|list }}"
+  when: elao_gem_packages
 
 - name: packages > Setup gem packages
   gem:
