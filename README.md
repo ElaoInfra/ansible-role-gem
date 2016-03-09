@@ -16,16 +16,23 @@ None.
 
 ## Installation
 
-Using ansible galaxy:
+### Ansible 2
+
+Not yet supported
+
+### Ansible 1
+
+Using ansible galaxy cli:
 
 ```bash
-ansible-galaxy install elao.gem
+ansible-galaxy install elao.gem,1.0
 ```
-You can add this role as a dependency for other roles by adding the role to the meta/main.yml file of your own role:
+
+Using ansible galaxy requirements file:
 
 ```yaml
-dependencies:
-  - { role: elao.gem }
+- src:     elao.gem
+  version: 1.0
 ```
 
 ## Role Variables
